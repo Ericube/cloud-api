@@ -36,6 +36,8 @@ subprojects {
         toolchain {
             languageVersion = JavaLanguageVersion.of(8)
         }
+        withSourcesJar()
+        withJavadocJar()
     }
 
     kotlin {
@@ -48,6 +50,7 @@ subprojects {
 
     publishing {
         repositories {
+            // Repository SimpleCloud existant
             maven {
                 name = "simplecloud"
                 url = uri("https://repo.simplecloud.app/snapshots/")
@@ -59,11 +62,47 @@ subprojects {
                     basic(BasicAuthentication)
                 }
             }
+
+            // GitHub Packages
+            maven {
+                name = "GitHubPackages"
+                url = uri("https://maven.pkg.github.com/Ericube/cloud-api")
+                credentials {
+                    username = System.getenv("GITHUB_ACTOR")
+                    password = System.getenv("GITHUB_TOKEN")
+                }
+            }
         }
 
         publications {
             mavenJava(MavenPublication) {
                 from components.java
+
+                pom {
+                    name = 'SimpleCloud API'
+                    description = 'API for SimpleCloud'
+                    url = 'https://github.com/Ericube/cloud-api'
+
+                    licenses {
+                        license {
+                            name = 'MIT License'
+                            url = 'https://opensource.org/licenses/MIT'
+                        }
+                    }
+
+                    developers {
+                        developer {
+                            id = 'ericube'
+                            name = 'Ericube'
+                        }
+                    }
+
+                    scm {
+                        url = 'https://github.com/Ericube/cloud-api'
+                        connection = 'scm:git:git://github.com/Ericube/cloud-api.git'
+                        developerConnection = 'scm:git:ssh://github.com/Ericube/cloud-api.git'
+                    }
+                }
             }
         }
     }
@@ -76,4 +115,18 @@ subprojects {
         sign publishing.publications
         useGpgCmd()
     }
-} 
+}
+
+// Configuration spécifique pour le projet racine si nécessaire
+publishing {
+    repositories {
+        maven {
+            name = "GitHubPackages"
+            url = uri("https://maven.pkg.github.com/Ericube/cloud-api")
+            credentials {
+                username = System.getenv("GITHUB_ACTOR")
+                password = System.getenv("GITHUB_TOKEN")
+            }
+        }
+    }
+}
