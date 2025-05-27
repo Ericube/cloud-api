@@ -4,13 +4,10 @@ plugins {
 }
 
 def baseVersion = "0.0.7"
-def commitHash = System.getenv("COMMIT_HASH")
-def timestamp = System.currentTimeMillis()
-def snapshotVersion = "${baseVersion}-dev.${timestamp}-${commitHash}"
 
 allprojects {
     group = "app.simplecloud.api"
-    version = commitHash != null ? snapshotVersion : baseVersion
+    version = baseVersion
 
     repositories {
         mavenCentral()
@@ -68,8 +65,8 @@ subprojects {
                 name = "GitHubPackages"
                 url = uri("https://maven.pkg.github.com/Ericube/cloud-api")
                 credentials {
-                    username = System.getenv("GITHUB_ACTOR")
-                    password = System.getenv("GITHUB_TOKEN")
+                    username = System.getenv("GITHUB_ACTOR") ?: System.getenv("ERI_USER")
+                    password = System.getenv("GITHUB_TOKEN") ?: System.getenv("ERI_TOKEN")
                 }
             }
         }
@@ -108,25 +105,7 @@ subprojects {
     }
 
     signing {
-        if (commitHash != null) {
-            return
-        }
-
         sign publishing.publications
         useGpgCmd()
-    }
-}
-
-// Configuration spécifique pour le projet racine si nécessaire
-publishing {
-    repositories {
-        maven {
-            name = "GitHubPackages"
-            url = uri("https://maven.pkg.github.com/Ericube/cloud-api")
-            credentials {
-                username = System.getenv("GITHUB_ACTOR")
-                password = System.getenv("GITHUB_TOKEN")
-            }
-        }
     }
 }
