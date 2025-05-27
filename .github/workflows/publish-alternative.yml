@@ -1,0 +1,58 @@
+name: Publish to GitHub Packages (Alternative)
+
+on:
+  release:
+    types: [created]
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 8
+        uses: actions/setup-java@v4
+        with:
+          java-version: '8'
+          distribution: 'temurin'
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Build with Gradle
+        run: ./gradlew build
+
+      - name: Debug - List all tasks
+        run: |
+          echo "=== All available tasks ==="
+          ./gradlew tasks --all
+          echo "=== Publish tasks only ==="
+          ./gradlew tasks --all | grep -i publish || echo "No publish tasks found"
+
+      - name: List subprojects
+        run: ./gradlew projects
+
+      - name: Try different publish commands
+        run: |
+          echo "Trying: gradle publish"
+          ./gradlew publish || echo "Command failed"
+          
+          echo "Trying: publishToMavenLocal first"
+          ./gradlew publishToMavenLocal || echo "Command failed"
+          
+          echo "Trying: publishMavenPublicationToGitHubPackagesRepository"
+          ./gradlew publishMavenPublicationToGitHubPackagesRepository || echo "Command failed"
+          
+          echo "Trying: publishMavenJavaPublicationToGitHubPackagesRepository"
+          ./gradlew publishMavenJavaPublicationToGitHubPackagesRepository || echo "Command failed"
+        env:
+          ERI_TOKEN: ${{ secrets.ERI_TOKEN }}
+          ERI_USER: ${{ secrets.ERI_USER }}

@@ -30,8 +30,11 @@ jobs:
       - name: Build with Gradle
         run: ./gradlew build
 
+      - name: List available publish tasks
+        run: ./gradlew tasks --all | grep -i publish
+
       - name: Publish to GitHub Packages
-        run: ./gradlew publishAllPublicationsToGitHubPackagesRepository
+        run: ./gradlew publish
         env:
           ERI_TOKEN: ${{ secrets.ERI_TOKEN }}
           ERI_USER: ${{ secrets.ERI_USER }}
