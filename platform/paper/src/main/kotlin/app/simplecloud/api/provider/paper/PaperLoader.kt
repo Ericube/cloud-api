@@ -14,7 +14,7 @@ class PaperLoader : PluginLoader {
         val resolver = MavenLibraryResolver()
         resolver.addDependency(
             Dependency(
-                DefaultArtifact("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0"), null
+                DefaultArtifact("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3"), null
             )
         )
         resolver.addRepository(

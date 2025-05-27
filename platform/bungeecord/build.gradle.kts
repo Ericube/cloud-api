@@ -21,6 +21,18 @@ dependencies {
     }
 }
 
+java {
+    toolchain.languageVersion.set(JavaLanguageVersion.of(8))
+}
+
+kotlin {
+    jvmToolchain(8)
+    compilerOptions {
+        apiVersion.set(org.jetbrains.kotlin.gradle.dsl.KotlinVersion.KOTLIN_1_8)
+        jvmTarget.set(JvmTarget.JVM_1_8)
+    }
+}
+
 tasks.named("shadowJar", ShadowJar::class) {
     mergeServiceFiles()
 

@@ -1,0 +1,79 @@
+plugins {
+    id 'java'
+    id 'maven-publish'
+}
+
+def baseVersion = "0.0.7"
+def commitHash = System.getenv("COMMIT_HASH")
+def timestamp = System.currentTimeMillis()
+def snapshotVersion = "${baseVersion}-dev.${timestamp}-${commitHash}"
+
+allprojects {
+    group = "app.simplecloud.api"
+    version = commitHash != null ? snapshotVersion : baseVersion
+
+    repositories {
+        mavenCentral()
+        mavenLocal()
+        maven { url "https://s01.oss.sonatype.org/content/repositories/snapshots/" }
+        maven { url "https://repo.papermc.io/repository/maven-public" }
+        maven { url "https://repo.simplecloud.app/snapshots" }
+        maven { url "https://buf.build/gen/maven" }
+        maven { url "https://plugins.gradle.org/m2/" }
+    }
+}
+
+subprojects {
+    if (project.path.startsWith(":platform:")) {
+        group = "app.simplecloud.api.platform"
+    }
+
+    apply plugin: 'java'
+    apply plugin: 'kotlin'
+    apply plugin: 'com.github.johnrengelman.shadow'
+
+    java {
+        toolchain {
+            languageVersion = JavaLanguageVersion.of(8)
+        }
+    }
+
+    kotlin {
+        jvmToolchain(8)
+        compilerOptions {
+            apiVersion = org.jetbrains.kotlin.gradle.dsl.KotlinVersion.KOTLIN_1_8
+            jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_1_8
+        }
+    }
+
+    publishing {
+        repositories {
+            maven {
+                name = "simplecloud"
+                url = uri("https://repo.simplecloud.app/snapshots/")
+                credentials {
+                    username = System.getenv("SIMPLECLOUD_USERNAME") ?: project.findProperty("simplecloudUsername")
+                    password = System.getenv("SIMPLECLOUD_PASSWORD") ?: project.findProperty("simplecloudPassword")
+                }
+                authentication {
+                    basic(BasicAuthentication)
+                }
+            }
+        }
+
+        publications {
+            mavenJava(MavenPublication) {
+                from components.java
+            }
+        }
+    }
+
+    signing {
+        if (commitHash != null) {
+            return
+        }
+
+        sign publishing.publications
+        useGpgCmd()
+    }
+} 
